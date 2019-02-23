@@ -1744,6 +1744,8 @@ $(function () {
                     $('#fb-href').hide();
                     $('#slack-href').hide();
 
+                    $('#mail-button').attr('onclick', 'openNewTab(' + client.id +')');
+
                     for (var i = 0; i < client.socialProfiles.length; i++) {
                         if (client.socialProfiles[i].socialProfileType.name == 'vk') {
                             $('#vk-href').attr('href', client.socialProfiles[i].link);
@@ -1815,6 +1817,10 @@ $(function () {
         });
     });
 });
+
+function openNewTab(id) {
+    window.open('emails/' + id);
+}
 
 $(function () {
     $('#main-modal-window').on('hidden.bs.modal', function () {

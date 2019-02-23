@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <script src="https://cdn.ckeditor.com/4.11.1/standard/ckeditor.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/global.css"/>
+    <!-- Подключаем Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"/>
+    <title>Title</title>
+</head>
+<body>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-4" style="height: auto" id="mailList">
+        </div>
+        <div class="col-md-8">
+            <div class="col-md-12" id="mailContentContainer"></div>
+            <hr/>
+            <div class="float-right">
+                <button type="button" id="replyButton" class="btn btn-outline-success" style="display: none">Ответить
+                </button>
+            </div>
+
+            <div class="col-md-12" id="skEditorHolder" style="background-color: silver; display: none">
+                <form>
+                    <textarea name="editor1" id="editor1" rows="10" cols="80"></textarea>
+                </form>
+            </div>
+            <br/>
+            <div style="display: inline">
+                <!--<div style="display: inline-block">-->
+                <!--<form id="fileUploadForm">-->
+                <!--<input type="file" id="file" name="file" style="display: none"/>-->
+                <!--</form>-->
+                <!--</div>-->
+                <div id="attachments"></div>
+                <div id="dragNdropContainer" style="display: none">
+
+                </div>
+
+                <div class="float-right" style="display: inline-block">
+                    <button type="button" id="sendButton" class="btn btn-outline-success" style="display: none">
+                        Отправить
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
+        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+<script th:src="@{/js/emailPage.js}"></script>
+
+</body>
+</html>
