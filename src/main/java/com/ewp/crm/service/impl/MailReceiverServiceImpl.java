@@ -275,6 +275,13 @@ public class MailReceiverServiceImpl implements MailReceiverService {
         Folder inbox;
         Message[] messages = null;
         Properties properties = new Properties();
+
+        properties.put("mail.imap.partialfetch","false");
+        properties.put("mail.imap.fetchsize", "1048576");
+        properties.put("mail.imaps.partialfetch", "false");
+        properties.put("mail.imaps.fetchsize", "1048576");
+
+
         Session session = Session.getDefaultInstance(properties, null);
 
         try {

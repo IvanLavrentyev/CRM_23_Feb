@@ -69,7 +69,9 @@ function getMailContent(mail_sentDateMills) {
 
     $('#pre').remove();
     $('#attachment_holder').remove();
-    
+    // $('#attachment_container').remove();
+
+
     document.getElementById('skEditorHolder').style.display = 'none';
     document.getElementById('sendButton').style.display = 'none';
 
@@ -94,7 +96,7 @@ function getMailContent(mail_sentDateMills) {
 
 let attachment_holder;
 
-     xhr = $.ajax({
+ xhr = $.ajax({
         method: 'POST',
         url:url,
         data:data,
