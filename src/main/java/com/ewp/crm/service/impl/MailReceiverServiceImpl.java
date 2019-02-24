@@ -1,6 +1,7 @@
 package com.ewp.crm.service.impl;
 
 import com.ewp.crm.models.Client;
+import com.ewp.crm.models.dto.AttachmentDto;
 import com.ewp.crm.models.dto.MailDto;
 import com.ewp.crm.service.interfaces.ClientService;
 import com.ewp.crm.service.interfaces.MailReceiverService;
@@ -190,8 +191,8 @@ public class MailReceiverServiceImpl implements MailReceiverService {
     }
 
     @Override
-    public List<File> getAttachmentsFromEmail (long sentDateMills){
-        List<File> attachments = new ArrayList<>();
+    public List<AttachmentDto> getAttachmentsFromEmail (long sentDateMills){
+        List<AttachmentDto> attachments = new ArrayList<>();
         messages.forEach(message -> {
             try {
                 if (message.getSentDate().getTime() == sentDateMills){
@@ -200,8 +201,9 @@ public class MailReceiverServiceImpl implements MailReceiverService {
                         BodyPart bodyPart = multipart.getBodyPart(i);
                         if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())){
                             File file = new File("transitFolder/receivedAttachments/" + bodyPart.getFileName());
+                            AttachmentDto attachmentDto = new AttachmentDto(sentDateMills,file);
                             ((MimeBodyPart) bodyPart).saveFile(file);
-                            attachments.add(file);
+                            attachments.add(attachmentDto);
                         }
                     }
                 }

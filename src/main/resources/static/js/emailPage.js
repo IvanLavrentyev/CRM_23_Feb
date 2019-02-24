@@ -57,15 +57,24 @@ function getEmails(id) {
     });
 }
 
-function getMailContent(i) {
+let xhr;
+function getMailContent(mail_sentDateMills) {
+
+    if (typeof xhr !== 'undefined'){
+        xhr.abort();
+        console.log('ajax call has been aborted');
+    }
+
+    console.log(mail_sentDateMills + ' start of method');
+
     $('#pre').remove();
     $('#attachment_holder').remove();
-
+    
     document.getElementById('skEditorHolder').style.display = 'none';
     document.getElementById('sendButton').style.display = 'none';
 
-    let transit = document.getElementById('mailContentHolder_' + i).cloneNode(true);
-    document.getElementById('mailHeaderHolder_' + i).style.fontWeight = 'normal';
+    let transit = document.getElementById('mailContentHolder_' + mail_sentDateMills).cloneNode(true);
+    document.getElementById('mailHeaderHolder_' + mail_sentDateMills).style.fontWeight = 'normal';
 
     let mailContentContainer = document.getElementById('mailContentContainer');
     let replyButton = document.getElementById('replyButton');
@@ -81,41 +90,58 @@ function getMailContent(i) {
     pre.append(transit.innerText);
 
     let url = '/mail/getAttachments';
-    let data = {sentDateMills: i};
+    let data = {sentDateMills: mail_sentDateMills};
 
 let attachment_holder;
 
-    // $.ajax({
-    //     method: 'POST',
-    //     url:url,
-    //     data:data,
-    //
-    //     success: function (attachments) {
-    //         if (attachments.length !== 0 ){
-    //
-    //             attachment_holder = document.createElement('div');
-    //             attachment_holder.setAttribute("id", "attachment_holder");
-    //
-    //             attachments.forEach( attachment => {
-    //                 console.log(attachment);
-    //
-    //                 let attachment_container = document.createElement('div');
-    //                 let a = document.createElement('a');
-    //
-    //                 let file_name = attachment.split('\\');
-    //                 file_name = file_name[file_name.length - 1];
-    //
-    //                 a.setAttribute('id', file_name);
-    //                 a.setAttribute('href', "/emails/downLoad/" + file_name);
-    //                 a.setAttribute('src', "/emails/downLoad/" + file_name);
-    //                 a.setAttribute('download', file_name);
-    //                 a.appendChild(document.createTextNode(file_name));
-    //                 attachment_container.appendChild(a);
-    //                 attachment_holder.appendChild(attachment_container);
-    //             })
-    //         } mailContentContainer.append(attachment_holder);
-    //     }
-    // });
+     xhr = $.ajax({
+        method: 'POST',
+        url:url,
+        data:data,
+
+        success: function (attachmentsDto) {
+            if (attachmentsDto.length !== 0){
+
+                attachment_holder = document.createElement('div');
+                attachment_holder.setAttribute("id", "attachment_holder");
+
+                attachmentsDto.forEach(attachmentDto => {
+
+                    let a = attachmentDto.dateSentMills;
+                    console.log(a + ' a');
+
+                    let b = mail_sentDateMills;
+                    console.log(b + ' b');
+
+                    console.log((a.toString()).localeCompare(b.toString()) + ' - compare');
+
+                    if ((a.toString()).localeCompare(b.toString()) === 0){
+                        console.log(attachmentDto);
+
+                        let attachment_container = document.createElement('div');
+                        let a = document.createElement('a');
+
+                        console.log(attachmentDto.attachmentFile);
+                        let file_name = attachmentDto.attachmentFile.split('\\');
+                        console.log(file_name);
+
+                        file_name = file_name[file_name.length - 1];
+
+                        a.setAttribute('id', file_name);
+                        a.setAttribute('href', "/emails/downLoad/" + file_name);
+                        a.setAttribute('src', "/emails/downLoad/" + file_name);
+                        a.setAttribute('download', file_name);
+                        a.appendChild(document.createTextNode(file_name));
+                        attachment_container.appendChild(a);
+                        attachment_holder.appendChild(attachment_container);
+                    }
+                });
+                if (typeof attachment_holder !== 'undefined'){
+                    mailContentContainer.append(attachment_holder);
+                }
+            }
+        }
+    });
     mailContentContainer.prepend(pre);
 }
 
