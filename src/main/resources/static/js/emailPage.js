@@ -22,7 +22,6 @@ function getEmails(id) {
         data: data,
 
         success: function (mails) {
-
             let mailList = document.getElementById("mailList");
 
             for (let i = 0; i < mails.length; i++) {
@@ -59,8 +58,9 @@ function getEmails(id) {
 }
 
 function getMailContent(i) {
-    $("#pre").remove();
-    $("#attachment_holder").remove();
+    $('#pre').remove();
+    $('#attachment_holder').remove();
+
     document.getElementById('skEditorHolder').style.display = 'none';
     document.getElementById('sendButton').style.display = 'none';
 
@@ -85,68 +85,37 @@ function getMailContent(i) {
 
 let attachment_holder;
 
-    $.ajax({
-        method: 'POST',
-        url:url,
-        data:data,
-
-        success: function (attachments) {
-            if (attachments.length !== 0 ){
-
-                attachment_holder = document.createElement('div');
-                attachment_holder.setAttribute("id", "attachment_holder");
-
-                attachments.forEach( attachment => {
-                    console.log(attachment);
-
-                    let attachment_container = document.createElement('div');
-                    let a = document.createElement('a');
-
-                    let file_name = attachment.split('\\');
-                    file_name = file_name[file_name.length - 1];
-
-                    a.setAttribute('id', file_name);
-                    a.setAttribute('href', "/emails/downLoad/" + file_name);
-                    a.setAttribute('src', "/emails/downLoad/" + file_name);
-                    a.setAttribute('download', file_name);
-                    a.appendChild(document.createTextNode(file_name));
-                    attachment_container.appendChild(a);
-                    attachment_holder.appendChild(attachment_container);
-                })
-            } mailContentContainer.append(attachment_holder);
-        }
-    });
-
-
-    // pre.append(transit.innerHTML);
-
-
-
-
-    // if (attr[i].length !== 0) {
-    //     let links_to_attachments = attr[i].split(',');
-    //     let attachment_holder = document.createElement('div');
-    //     attachment_holder.setAttribute("id", "attachment_holder");
+    // $.ajax({
+    //     method: 'POST',
+    //     url:url,
+    //     data:data,
     //
-    //     let attachment = [];
-    //     for (let j = 0; j < links_to_attachments.length; j++) {
+    //     success: function (attachments) {
+    //         if (attachments.length !== 0 ){
     //
-    //         attachment[j] = document.createElement('div');
-    //         let a = document.createElement('a');
+    //             attachment_holder = document.createElement('div');
+    //             attachment_holder.setAttribute("id", "attachment_holder");
     //
-    //         let file_name = links_to_attachments[j].split('\\');
-    //         file_name = file_name[file_name.length - 1];
+    //             attachments.forEach( attachment => {
+    //                 console.log(attachment);
     //
-    //         a.setAttribute('id', file_name);
-    //         a.setAttribute('href', "/emails/downLoad/" + file_name);
-    //         a.setAttribute('src', "/emails/downLoad/" + file_name);
-    //         a.setAttribute('download', file_name);
-    //         a.appendChild(document.createTextNode(file_name));
-    //         attachment[j].appendChild(a);
-    //         attachment_holder.appendChild(attachment[j]);
+    //                 let attachment_container = document.createElement('div');
+    //                 let a = document.createElement('a');
+    //
+    //                 let file_name = attachment.split('\\');
+    //                 file_name = file_name[file_name.length - 1];
+    //
+    //                 a.setAttribute('id', file_name);
+    //                 a.setAttribute('href', "/emails/downLoad/" + file_name);
+    //                 a.setAttribute('src', "/emails/downLoad/" + file_name);
+    //                 a.setAttribute('download', file_name);
+    //                 a.appendChild(document.createTextNode(file_name));
+    //                 attachment_container.appendChild(a);
+    //                 attachment_holder.appendChild(attachment_container);
+    //             })
+    //         } mailContentContainer.append(attachment_holder);
     //     }
-    //     mailContentContainer.append(attachment_holder);
-    // }
+    // });
     mailContentContainer.prepend(pre);
 }
 
