@@ -22,17 +22,19 @@ function getEmails(id) {
         data: data,
 
         success: function (mails) {
+
             let mailList = document.getElementById("mailList");
 
             for (let i = 0; i < mails.length; i++) {
                 let mail = document.createElement('div');
                 mail.setAttribute('style', 'cursor:pointer');
-                mail.setAttribute('onclick', 'getMailContent(' + i + ')');
+                mail.setAttribute('onclick', 'getMailContent(' + mails[i].sentDateMills + ')');
+
                 let mailContentHolder = document.createElement('div');
                 let mailHeaderHolder = document.createElement('div');
-                mailContentHolder.setAttribute('id', 'mailContentHolder_' + i);
+                mailContentHolder.setAttribute('id', 'mailContentHolder_' + mails[i].sentDateMills);
                 mailContentHolder.style.display = 'none';
-                mailHeaderHolder.setAttribute('id', 'mailHeaderHolder_' + i);
+                mailHeaderHolder.setAttribute('id', 'mailHeaderHolder_' + mails[i].sentDateMills);
                 mail.appendChild(mailHeaderHolder);
                 mail.appendChild(mailContentHolder);
 
@@ -40,8 +42,8 @@ function getEmails(id) {
                 let mailSentDate = mails[i].sentDate;
                 let mailSubject = mails[i].subject;
                 let mailContent = mails[i].content;
-                localAttachmentPath = mails[i].localAttachmentsFolder;
-                attr[i] = mails[i].attachements.toString();
+                // localAttachmentPath = mails[i].localAttachmentsFolder;
+                // attr[i] = mails[i].attachements.toString();
                 mailContentHolder.append(mailContent);
                 mailHeaderHolder.innerHTML = mailSentDate + '---' + mailSubject;
 
@@ -61,6 +63,7 @@ function getMailContent(i) {
     $("#attachment_holder").remove();
     document.getElementById('skEditorHolder').style.display = 'none';
     document.getElementById('sendButton').style.display = 'none';
+
     let transit = document.getElementById('mailContentHolder_' + i).cloneNode(true);
     document.getElementById('mailHeaderHolder_' + i).style.fontWeight = 'normal';
 
@@ -76,32 +79,74 @@ function getMailContent(i) {
 
     // transit.removeAttribute('style');
     pre.append(transit.innerText);
+
+    let url = '/mail/getAttachments';
+    let data = {sentDateMills: i};
+
+let attachment_holder;
+
+    $.ajax({
+        method: 'POST',
+        url:url,
+        data:data,
+
+        success: function (attachments) {
+            if (attachments.length !== 0 ){
+
+                attachment_holder = document.createElement('div');
+                attachment_holder.setAttribute("id", "attachment_holder");
+
+                attachments.forEach( attachment => {
+                    console.log(attachment);
+
+                    let attachment_container = document.createElement('div');
+                    let a = document.createElement('a');
+
+                    let file_name = attachment.split('\\');
+                    file_name = file_name[file_name.length - 1];
+
+                    a.setAttribute('id', file_name);
+                    a.setAttribute('href', "/emails/downLoad/" + file_name);
+                    a.setAttribute('src', "/emails/downLoad/" + file_name);
+                    a.setAttribute('download', file_name);
+                    a.appendChild(document.createTextNode(file_name));
+                    attachment_container.appendChild(a);
+                    attachment_holder.appendChild(attachment_container);
+                })
+            } mailContentContainer.append(attachment_holder);
+        }
+    });
+
+
     // pre.append(transit.innerHTML);
 
-    if (attr[i].length !== 0) {
-        let links_to_attachments = attr[i].split(',');
-        let attachment_holder = document.createElement('div');
-        attachment_holder.setAttribute("id", "attachment_holder");
 
-        let attachment = [];
-        for (let j = 0; j < links_to_attachments.length; j++) {
 
-            attachment[j] = document.createElement('div');
-            let a = document.createElement('a');
 
-            let file_name = links_to_attachments[j].split('\\');
-            file_name = file_name[file_name.length - 1];
-
-            a.setAttribute('id', file_name);
-            a.setAttribute('href', "/emails/downLoad/" + file_name);
-            a.setAttribute('src', "/emails/downLoad/" + file_name);
-            a.setAttribute('download', file_name);
-            a.appendChild(document.createTextNode(file_name));
-            attachment[j].appendChild(a);
-            attachment_holder.appendChild(attachment[j]);
-        }
-        mailContentContainer.append(attachment_holder);
-    }
+    // if (attr[i].length !== 0) {
+    //     let links_to_attachments = attr[i].split(',');
+    //     let attachment_holder = document.createElement('div');
+    //     attachment_holder.setAttribute("id", "attachment_holder");
+    //
+    //     let attachment = [];
+    //     for (let j = 0; j < links_to_attachments.length; j++) {
+    //
+    //         attachment[j] = document.createElement('div');
+    //         let a = document.createElement('a');
+    //
+    //         let file_name = links_to_attachments[j].split('\\');
+    //         file_name = file_name[file_name.length - 1];
+    //
+    //         a.setAttribute('id', file_name);
+    //         a.setAttribute('href', "/emails/downLoad/" + file_name);
+    //         a.setAttribute('src', "/emails/downLoad/" + file_name);
+    //         a.setAttribute('download', file_name);
+    //         a.appendChild(document.createTextNode(file_name));
+    //         attachment[j].appendChild(a);
+    //         attachment_holder.appendChild(attachment[j]);
+    //     }
+    //     mailContentContainer.append(attachment_holder);
+    // }
     mailContentContainer.prepend(pre);
 }
 

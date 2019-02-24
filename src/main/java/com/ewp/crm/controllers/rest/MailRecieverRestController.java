@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.File;
 import java.util.List;
 
 @RestController
@@ -24,8 +25,14 @@ public class MailRecieverRestController {
     @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @PostMapping(value = "/mail/getEmails")
     public ResponseEntity<List<MailDto>> getAllUnreadEmailsFor(@RequestParam(name = "id") Long id){
-        List<MailDto> mailList = mailReceiverService.getAllUnreadEmailsFor(id);
+        List<MailDto> mailList = mailReceiverService.getAllEmailsFor(id);
         return ResponseEntity.ok(mailList);
     }
 
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
+    @PostMapping(value = "/mail/getAttachments")
+    public ResponseEntity<List<File>> getAllAttachments(@RequestParam(name = "sentDateMills") Long sentDateMills) {
+        List<File> attachmentsList = mailReceiverService.getAttachmentsFromEmail(sentDateMills);
+        return ResponseEntity.ok(attachmentsList);
+    }
 }

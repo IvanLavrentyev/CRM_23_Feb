@@ -38,17 +38,18 @@ public class MailReceiverServiceImpl implements MailReceiverService {
     private MailDto mailDto;
     private ClientService clientService;
     private String localFolder;
+    private List<Message> messages;
 
     @Autowired
     public MailReceiverServiceImpl(Environment environment,
                                    UserService userService,
                                    MailDto mailDto,
                                    ClientService clientService) {
+        checkConfig(environment);
         this.clientService = clientService;
         this.mailDto = mailDto;
         this.userService = userService;
         this.environment = environment;
-        checkConfig(environment);
     }
 
     private void checkConfig(Environment environment) {
@@ -69,10 +70,11 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 
     @Override
     public List<Long> checkMessagesInGMailInbox() {
+
         List<Long> userIdList = new ArrayList<>();
 
-        Message[] messages = getMessages("imaps", "imap.gmail.com", eMailLogin,
-                eMailPassword, "INBOX");
+//        Message[] messages = getMessages("imaps", "imap.gmail.com", eMailLogin,
+//                eMailPassword, "INBOX");
 
         if (messages != null) {
             for (Message message : messages) {
@@ -114,56 +116,102 @@ public class MailReceiverServiceImpl implements MailReceiverService {
             InputStream in = new FileInputStream(FILES_DIR + fileName);
             response.setContentType("application/force-download");
             response.setHeader("Content-Disposition", "attachment; filename="+fileName);
-
             IOUtils.copy(in, response.getOutputStream());
-
             response.flushBuffer();
             in.close();
+
         } catch (IOException e1) {
             e1.printStackTrace();
         }
     }
 
     @Override
-    public List<MailDto> getAllUnreadEmailsFor(Long id) {
+    public List<MailDto> getAllEmailsFor(Long id) {
 //        TransitFolderCleaner.cleanFolder(localFolder);
-        Client client;
         List<MailDto> messageList = new ArrayList<>();
-        Message[] messages = getMessages("imaps", "imap.gmail.com", eMailLogin,
-                eMailPassword, "INBOX");
+//        Message[] mess = getMessages("imaps", "imap.gmail.com", eMailLogin,
+//                eMailPassword, "INBOX");
+//        List<Message> messages = new ArrayList<>(Arrays.asList(this.messages));
+        Client client = clientService.get(id);
+        messages = Arrays.asList(getMessages("imaps", "imap.gmail.com", eMailLogin,
+                eMailPassword, "INBOX"));
 
-        for (int i = 0; i <messages.length ; i++) {
-            MailDto mail = new MailDto();
-            try {
-                mail.setSeen(messages[i].isSet(Flags.Flag.SEEN));
-                String email = getEmailAddress(messages[i].getFrom()[0].toString());
-                try {
-                    client = clientService.getClientByEmail(email);
+       messages.forEach(message -> {
+           try {
+               String from = message.getFrom()[0].toString();
+               if (client.getEmail().equalsIgnoreCase(getEmailAddress(from))){
+                   MailDto mail = new MailDto();
+                   mail.setSeen(message.isSet(Flags.Flag.SEEN));
+                   mail.setSentDate(convertDate(message.getSentDate()));
+                   mail.setSentDateMills(message.getSentDate().getTime());
+                   mail.setContent(getTextFromMessage(message));
+                   mail.setSubject(message.getSubject());
+                   messageList.add(mail);
 
-                    if (client.getId() == id) {
-                        mail.setUserId(client.getId());
-                        mail.setSentFrom(email);
-                        mail.setSentDate(convertDate(messages[i].getSentDate()));
-                        mail.setContent(getTextFromMessage(messages[i]));
-                        mail.setSubject(messages[i].getSubject());
-                        mail.setAttachements(getAttachmentsFromMessage(messages[i], i));
-                        mail.setLocalAttachmentsFolder(localFolder);
-                        messageList.add(mail);
-                    } else
-                        messages[i].setFlag(Flags.Flag.SEEN, false);
+               }else
+                   message.setFlag(Flags.Flag.SEEN, false);
 
-                } catch (NullPointerException e) {
-                    logger.error("Email from unknown address {} has been received ", email);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            }
-        }
+           } catch (MessagingException | IOException e) {
+               e.printStackTrace();
+           }
+       });
+
+//        for (int i = 0; i <messages.length ; i++) {
+//            MailDto mail = new MailDto();
+//            try {
+//                mail.setSeen(messages[i].isSet(Flags.Flag.SEEN));
+//                String email = getEmailAddress(messages[i].getFrom()[0].toString());
+//                try {
+////                    client = clientService.getClientByEmail(email);
+//
+//                    if (client.getId() == id) {
+////                        mail.setUserId(client.getId());
+//                        mail.setSentFrom(email);
+//                        mail.setSentDate(convertDate(messages[i].getSentDate()));
+//                        mail.setContent(getTextFromMessage(messages[i]));
+//                        mail.setSubject(messages[i].getSubject());
+////                        mail.setAttachements(getAttachmentsFromMessage(messages[i], i));
+////                        mail.setLocalAttachmentsFolder(localFolder);
+//                        messageList.add(mail);
+//                    } else
+//                        messages[i].setFlag(Flags.Flag.SEEN, false);
+//
+//                } catch (NullPointerException e) {
+//                    logger.error("Email from unknown address {} has been received ", email);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            } catch (MessagingException e) {
+//                e.printStackTrace();
+//            }
+//        }
         Collections.reverse(messageList);
         return messageList;
     }
+
+    @Override
+    public List<File> getAttachmentsFromEmail (long sentDateMills){
+        List<File> attachments = new ArrayList<>();
+        messages.forEach(message -> {
+            try {
+                if (message.getSentDate().getTime() == sentDateMills){
+                    Multipart multipart = (Multipart) message.getContent();
+                    for (int i = 0; i < multipart.getCount(); i++) {
+                        BodyPart bodyPart = multipart.getBodyPart(i);
+                        if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())){
+                            File file = new File("transitFolder/receivedAttachments/" + bodyPart.getFileName());
+                            ((MimeBodyPart) bodyPart).saveFile(file);
+                            attachments.add(file);
+                        }
+                    }
+                }
+            } catch (MessagingException | IOException e) {
+                e.printStackTrace();
+            }
+        });
+        return attachments;
+    }
+
 
     private String getTextFromMessage(Message message) throws MessagingException, IOException {
         String result = "";
@@ -194,19 +242,21 @@ public class MailReceiverServiceImpl implements MailReceiverService {
         return result;
     }
 
-    private List<File> getAttachmentsFromMessage (Message message, int j) throws IOException, MessagingException {
-        List<File> attachments = new ArrayList<>();
-        Multipart multipart = (Multipart) message.getContent();
-        for (int i = 0; i < multipart.getCount() ; i++) {
-            BodyPart bodyPart = multipart.getBodyPart(i);
-            if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())){
-                File file = new File(localFolder + j +"_"+ bodyPart.getFileName());
-                ((MimeBodyPart) bodyPart).saveFile(file);
-                attachments.add(file);
-            }
-        }
-        return attachments;
-    }
+//    private List<File> getAttachmentsFromMessage (Message message, int j) throws IOException, MessagingException {
+//        List<File> attachments = new ArrayList<>();
+//        Multipart multipart = (Multipart) message.getContent();
+//        for (int i = 0; i < multipart.getCount() ; i++) {
+//            BodyPart bodyPart = multipart.getBodyPart(i);
+//            if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())){
+//                File file = new File(localFolder + j +"_"+ bodyPart.getFileName());
+//                ((MimeBodyPart) bodyPart).saveFile(file);
+//                attachments.add(file);
+//            }
+//        }
+//        return attachments;
+//    }
+
+
 
     private String convertDate(Date date) {
         Format formatter = new SimpleDateFormat("dd-MM-yyyy");

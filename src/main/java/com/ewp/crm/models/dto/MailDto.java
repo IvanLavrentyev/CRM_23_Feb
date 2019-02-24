@@ -14,6 +14,8 @@ public class MailDto {
 
     private String sentDate;
 
+    private long sentDateMills;
+
     private String subject;
 
     private String sentFrom;
@@ -26,6 +28,13 @@ public class MailDto {
 
     public MailDto() {}
 
+    public long getSentDateMills() {
+        return sentDateMills;
+    }
+
+    public void setSentDateMills(long sentDateMills) {
+        this.sentDateMills = sentDateMills;
+    }
 
     public long getUserId() {
         return clientId;
