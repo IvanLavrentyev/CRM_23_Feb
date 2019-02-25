@@ -65,7 +65,7 @@ function getMailContent(mail_sentDateMills) {
         console.log('ajax call has been aborted');
     }
 
-    console.log(mail_sentDateMills + ' start of method');
+    // console.log(mail_sentDateMills + ' start of method');
 
     $('#pre').remove();
     $('#attachment_holder').remove();

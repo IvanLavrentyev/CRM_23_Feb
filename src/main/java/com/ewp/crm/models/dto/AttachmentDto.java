@@ -7,23 +7,38 @@ import java.io.File;
 @Component
 public class AttachmentDto {
 
-    private long DateSentMills;
+    private long dateSentMills;
     private File attachmentFile;
+    private String content;
 
     public AttachmentDto() {
     }
 
     public AttachmentDto(long dateSentMills, File attachmentFile) {
-        DateSentMills = dateSentMills;
+        this.dateSentMills = dateSentMills;
         this.attachmentFile = attachmentFile;
     }
 
+    public AttachmentDto(long dateSentMills, File attachmentFile, String content) {
+        this.dateSentMills = dateSentMills;
+        this.attachmentFile = attachmentFile;
+        this.content = content;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
     public long getDateSentMills() {
-        return DateSentMills;
+        return dateSentMills;
     }
 
     public void setDateSentMills(long dateSentMills) {
-        DateSentMills = dateSentMills;
+        this.dateSentMills = dateSentMills;
     }
 
     public File getAttachmentFile() {

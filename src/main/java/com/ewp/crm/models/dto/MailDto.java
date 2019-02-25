@@ -10,8 +10,6 @@ public class MailDto {
 
     private long clientId;
 
-    private String content;
-
     private String sentDate;
 
     private long sentDateMills;
@@ -42,14 +40,6 @@ public class MailDto {
 
     public void setUserId(long userId) {
         this.clientId = userId;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
     }
 
     public String getSentDate() {
@@ -104,7 +94,6 @@ public class MailDto {
     public String toString() {
         return "MailDto{" +
                 "userId=" + clientId +
-                ", content='" + content + '\'' +
                 ", sentDate='" + sentDate + '\'' +
                 ", subject='" + subject + '\'' +
                 ", sentFrom='" + sentFrom + '\'' +

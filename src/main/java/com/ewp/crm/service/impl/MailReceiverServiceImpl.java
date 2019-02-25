@@ -130,10 +130,8 @@ public class MailReceiverServiceImpl implements MailReceiverService {
     public List<MailDto> getAllEmailsFor(Long id) {
 //        TransitFolderCleaner.cleanFolder(localFolder);
         List<MailDto> messageList = new ArrayList<>();
-//        Message[] mess = getMessages("imaps", "imap.gmail.com", eMailLogin,
-//                eMailPassword, "INBOX");
-//        List<Message> messages = new ArrayList<>(Arrays.asList(this.messages));
         Client client = clientService.get(id);
+
         messages = Arrays.asList(getMessages("imaps", "imap.gmail.com", eMailLogin,
                 eMailPassword, "INBOX"));
 
@@ -144,48 +142,21 @@ public class MailReceiverServiceImpl implements MailReceiverService {
                    MailDto mail = new MailDto();
                    mail.setSeen(message.isSet(Flags.Flag.SEEN));
                    mail.setSentDate(convertDate(message.getSentDate()));
-                   mail.setSentDateMills(message.getSentDate().getTime());
-                   mail.setContent(getTextFromMessage(message));
+//                   mail.setSentDateMills(message.getSentDate().getTime());
+//                   mail.setContent(getTextFromMessage(message));
                    mail.setSubject(message.getSubject());
                    messageList.add(mail);
+
+                   System.out.println("reading message " + new Date().getTime());
 
                }else
                    message.setFlag(Flags.Flag.SEEN, false);
 
-           } catch (MessagingException | IOException e) {
+           } catch (MessagingException e) {
                e.printStackTrace();
            }
        });
 
-//        for (int i = 0; i <messages.length ; i++) {
-//            MailDto mail = new MailDto();
-//            try {
-//                mail.setSeen(messages[i].isSet(Flags.Flag.SEEN));
-//                String email = getEmailAddress(messages[i].getFrom()[0].toString());
-//                try {
-////                    client = clientService.getClientByEmail(email);
-//
-//                    if (client.getId() == id) {
-////                        mail.setUserId(client.getId());
-//                        mail.setSentFrom(email);
-//                        mail.setSentDate(convertDate(messages[i].getSentDate()));
-//                        mail.setContent(getTextFromMessage(messages[i]));
-//                        mail.setSubject(messages[i].getSubject());
-////                        mail.setAttachements(getAttachmentsFromMessage(messages[i], i));
-////                        mail.setLocalAttachmentsFolder(localFolder);
-//                        messageList.add(mail);
-//                    } else
-//                        messages[i].setFlag(Flags.Flag.SEEN, false);
-//
-//                } catch (NullPointerException e) {
-//                    logger.error("Email from unknown address {} has been received ", email);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            } catch (MessagingException e) {
-//                e.printStackTrace();
-//            }
-//        }
         Collections.reverse(messageList);
         return messageList;
     }
@@ -196,12 +167,13 @@ public class MailReceiverServiceImpl implements MailReceiverService {
         messages.forEach(message -> {
             try {
                 if (message.getSentDate().getTime() == sentDateMills){
+                    String messageText = getTextFromMessage(message);
                     Multipart multipart = (Multipart) message.getContent();
                     for (int i = 0; i < multipart.getCount(); i++) {
                         BodyPart bodyPart = multipart.getBodyPart(i);
                         if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())){
                             File file = new File("transitFolder/receivedAttachments/" + bodyPart.getFileName());
-                            AttachmentDto attachmentDto = new AttachmentDto(sentDateMills,file);
+                            AttachmentDto attachmentDto = new AttachmentDto(sentDateMills,file,messageText);
                             ((MimeBodyPart) bodyPart).saveFile(file);
                             attachments.add(attachmentDto);
                         }
@@ -277,10 +249,9 @@ public class MailReceiverServiceImpl implements MailReceiverService {
         Properties properties = new Properties();
 
         properties.put("mail.imap.partialfetch","false");
-        properties.put("mail.imap.fetchsize", "1048576");
+        properties.put("mail.imap.fetchsize", "3000000");
         properties.put("mail.imaps.partialfetch", "false");
-        properties.put("mail.imaps.fetchsize", "1048576");
-
+        properties.put("mail.imaps.fetchsize", "3000000");
 
         Session session = Session.getDefaultInstance(properties, null);
 
@@ -289,7 +260,13 @@ public class MailReceiverServiceImpl implements MailReceiverService {
             store.connect(host, eMailLogin, eMailPassword);
             inbox = store.getFolder(mailboxToOpen);
             inbox.open(Folder.READ_WRITE);
+
+            FetchProfile fp = new FetchProfile();
+            fp.add(FetchProfile.Item.ENVELOPE);
+            fp.add("Subject");
+
             messages = inbox.getMessages();
+            inbox.fetch(messages, fp);
 
         } catch (NoSuchProviderException e) {
             logger.error("Failed to connect to remote server, wrong protocol" + e);
