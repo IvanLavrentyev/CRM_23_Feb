@@ -1,12 +1,12 @@
 package com.ewp.crm.service.impl;
 
 import com.ewp.crm.models.Client;
-import com.ewp.crm.models.dto.AttachmentDto;
 import com.ewp.crm.models.dto.MailDto;
 import com.ewp.crm.service.interfaces.ClientService;
 import com.ewp.crm.service.interfaces.MailReceiverService;
 import com.ewp.crm.service.interfaces.UserService;
 //        import com.ewp.crm.utils.cleaner.TransitFolderCleaner;
+import com.ewp.crm.utils.cleaner.TransitFolderCleaner;
 import com.google.api.client.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,9 +74,6 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 
         List<Long> userIdList = new ArrayList<>();
 
-//        Message[] messages = getMessages("imaps", "imap.gmail.com", eMailLogin,
-//                eMailPassword, "INBOX");
-
         if (messages != null) {
             for (Message message : messages) {
                 try {
@@ -128,7 +125,7 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 
     @Override
     public List<MailDto> getAllEmailsFor(Long id) {
-//        TransitFolderCleaner.cleanFolder(localFolder);
+        TransitFolderCleaner.cleanFolder(localFolder);
         List<MailDto> messageList = new ArrayList<>();
         Client client = clientService.get(id);
 
@@ -142,13 +139,9 @@ public class MailReceiverServiceImpl implements MailReceiverService {
                    MailDto mail = new MailDto();
                    mail.setSeen(message.isSet(Flags.Flag.SEEN));
                    mail.setSentDate(convertDate(message.getSentDate()));
-//                   mail.setSentDateMills(message.getSentDate().getTime());
-//                   mail.setContent(getTextFromMessage(message));
+                   mail.setSentDateMills(message.getSentDate().getTime());
                    mail.setSubject(message.getSubject());
                    messageList.add(mail);
-
-                   System.out.println("reading message " + new Date().getTime());
-
                }else
                    message.setFlag(Flags.Flag.SEEN, false);
 
@@ -156,26 +149,54 @@ public class MailReceiverServiceImpl implements MailReceiverService {
                e.printStackTrace();
            }
        });
-
         Collections.reverse(messageList);
         return messageList;
     }
 
+//    @Override
+//    public List<MailDto> getAttachmentsFromEmail (long sentDateMills){
+//        List<MailDto> attachments = new ArrayList<>();
+//        messages.forEach(message -> {
+//            try {
+//                if (message.getSentDate().getTime() == sentDateMills){
+//                    String messageText = getTextFromMessage(message);
+//                    Multipart multipart = (Multipart) message.getContent();
+//                    MailDto mailDto = new MailDto();
+//                    mailDto.setContent(messageText);
+//                    for (int i = 0; i < multipart.getCount(); i++) {
+//                        BodyPart bodyPart = multipart.getBodyPart(i);
+//                        if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())){
+//                            File file = new File("transitFolder/receivedAttachments/" + bodyPart.getFileName());
+//                            ((MimeBodyPart) bodyPart).saveFile(file);
+//                            attachments.add(file);
+//                        }
+//                    }
+//                }
+//            } catch (MessagingException | IOException e) {
+//                e.printStackTrace();
+//            }
+//        });
+//        return attachments;
+//    }
+
     @Override
-    public List<AttachmentDto> getAttachmentsFromEmail (long sentDateMills){
-        List<AttachmentDto> attachments = new ArrayList<>();
+    public MailDto getEmailContentAndAttachment (long sentDateMills){
+        TransitFolderCleaner.cleanFolder(localFolder);
+        List<File> attachments = new ArrayList<>();
+        MailDto mail = new MailDto();
         messages.forEach(message -> {
             try {
                 if (message.getSentDate().getTime() == sentDateMills){
                     String messageText = getTextFromMessage(message);
                     Multipart multipart = (Multipart) message.getContent();
+                    mail.setContent(messageText);
+
                     for (int i = 0; i < multipart.getCount(); i++) {
                         BodyPart bodyPart = multipart.getBodyPart(i);
                         if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())){
-                            File file = new File("transitFolder/receivedAttachments/" + bodyPart.getFileName());
-                            AttachmentDto attachmentDto = new AttachmentDto(sentDateMills,file,messageText);
-                            ((MimeBodyPart) bodyPart).saveFile(file);
-                            attachments.add(attachmentDto);
+                            File attachment = new File("transitFolder/receivedAttachments/" + bodyPart.getFileName());
+                            ((MimeBodyPart) bodyPart).saveFile(attachment);
+                            attachments.add(attachment);
                         }
                     }
                 }
@@ -183,9 +204,9 @@ public class MailReceiverServiceImpl implements MailReceiverService {
                 e.printStackTrace();
             }
         });
-        return attachments;
+        mail.setAttachments(attachments);
+        return mail;
     }
-
 
     private String getTextFromMessage(Message message) throws MessagingException, IOException {
         String result = "";

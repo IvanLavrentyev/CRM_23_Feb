@@ -1,5 +1,4 @@
 let attr = [];
-let localAttachmentPath;
 let id;
 let file;
 let attachedFiles = [];
@@ -41,8 +40,7 @@ function getEmails(id) {
                 let mailSentDate = mails[i].sentDate;
                 let mailSubject = mails[i].subject;
                 let mailContent = mails[i].content;
-                // localAttachmentPath = mails[i].localAttachmentsFolder;
-                // attr[i] = mails[i].attachements.toString();
+
                 mailContentHolder.append(mailContent);
                 mailHeaderHolder.innerHTML = mailSentDate + '---' + mailSubject;
 
@@ -65,68 +63,43 @@ function getMailContent(mail_sentDateMills) {
         console.log('ajax call has been aborted');
     }
 
-    // console.log(mail_sentDateMills + ' start of method');
-
     $('#pre').remove();
     $('#attachment_holder').remove();
-    // $('#attachment_container').remove();
-
 
     document.getElementById('skEditorHolder').style.display = 'none';
     document.getElementById('sendButton').style.display = 'none';
 
-    let transit = document.getElementById('mailContentHolder_' + mail_sentDateMills).cloneNode(true);
     document.getElementById('mailHeaderHolder_' + mail_sentDateMills).style.fontWeight = 'normal';
 
-    let mailContentContainer = document.getElementById('mailContentContainer');
     let replyButton = document.getElementById('replyButton');
     replyButton.setAttribute('onclick', 'replyToEmail()');
     replyButton.style.display = 'block';
 
+    let url = '/mail/getEmailContentAndAttachment';
+    let data = {sentDateMills: mail_sentDateMills};
+
     let pre = document.createElement('pre');
-    // let pre = document.createElement('pre');
     pre.setAttribute('id', 'pre');
     pre.setAttribute('style', 'word-wrap: break-word');
 
-    // transit.removeAttribute('style');
-    pre.append(transit.innerText);
-
-    let url = '/mail/getAttachments';
-    let data = {sentDateMills: mail_sentDateMills};
-
 let attachment_holder;
-
  xhr = $.ajax({
         method: 'POST',
         url:url,
         data:data,
 
-        success: function (attachmentsDto) {
-            if (attachmentsDto.length !== 0){
+        success: function (emailContentAndAttachment) {
+            let mailContentContainer = document.getElementById('mailContentContainer');
+            pre.append(emailContentAndAttachment.content);
 
+            if (emailContentAndAttachment.attachments.length !== 0){
                 attachment_holder = document.createElement('div');
                 attachment_holder.setAttribute("id", "attachment_holder");
-
-                attachmentsDto.forEach(attachmentDto => {
-
-                    let a = attachmentDto.dateSentMills;
-                    console.log(a + ' a');
-
-                    let b = mail_sentDateMills;
-                    console.log(b + ' b');
-
-                    console.log((a.toString()).localeCompare(b.toString()) + ' - compare');
-
-                    if ((a.toString()).localeCompare(b.toString()) === 0){
-                        console.log(attachmentDto);
+                emailContentAndAttachment.attachments.forEach(attachment => {
 
                         let attachment_container = document.createElement('div');
                         let a = document.createElement('a');
-
-                        console.log(attachmentDto.attachmentFile);
-                        let file_name = attachmentDto.attachmentFile.split('\\');
-                        console.log(file_name);
-
+                        let file_name = attachment.split('\\');
                         file_name = file_name[file_name.length - 1];
 
                         a.setAttribute('id', file_name);
@@ -136,7 +109,6 @@ let attachment_holder;
                         a.appendChild(document.createTextNode(file_name));
                         attachment_container.appendChild(a);
                         attachment_holder.appendChild(attachment_container);
-                    }
                 });
                 if (typeof attachment_holder !== 'undefined'){
                     mailContentContainer.append(attachment_holder);

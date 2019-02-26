@@ -1,6 +1,5 @@
 package com.ewp.crm.controllers.rest;
 
-import com.ewp.crm.models.dto.AttachmentDto;
 import com.ewp.crm.models.dto.MailDto;
 import com.ewp.crm.service.interfaces.MailReceiverService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +30,9 @@ public class MailRecieverRestController {
     }
 
     @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
-    @PostMapping(value = "/mail/getAttachments")
-    public ResponseEntity<List<AttachmentDto>> getAllAttachments(@RequestParam(name = "sentDateMills") Long sentDateMills) {
-        List<AttachmentDto> attachmentsList = mailReceiverService.getAttachmentsFromEmail(sentDateMills);
-        return ResponseEntity.ok(attachmentsList);
+    @PostMapping(value = "/mail/getEmailContentAndAttachment")
+    public ResponseEntity<MailDto> getEmailContentAndAttachment(@RequestParam(name = "sentDateMills") Long sentDateMills) {
+        MailDto mailCOntentAndAttachments = mailReceiverService.getEmailContentAndAttachment(sentDateMills);
+        return ResponseEntity.ok(mailCOntentAndAttachments);
     }
 }

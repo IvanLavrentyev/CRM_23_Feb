@@ -1,6 +1,5 @@
 package com.ewp.crm.service.interfaces;
 
-import com.ewp.crm.models.dto.AttachmentDto;
 import com.ewp.crm.models.dto.MailDto;
 
 import javax.servlet.http.HttpServletResponse;
@@ -11,7 +10,9 @@ public interface MailReceiverService {
 
     List<MailDto> getAllEmailsFor(Long userId);
 
-    List <AttachmentDto> getAttachmentsFromEmail (long sentDateMills);
+//    List <MailDto> getAttachmentsFromEmail (long sentDateMills);
+
+    MailDto getEmailContentAndAttachment (long sentDateMills);
 
     List<Long> checkMessagesInGMailInbox();
 

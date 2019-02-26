@@ -20,9 +20,39 @@ public class MailDto {
 
     private boolean isSeen;
 
-    private List<File> attachements;
+    private String content;
+
+    private List<File> attachments;
 
     private String localAttachmentsFolder;
+
+//    private File attachmentFile;
+
+    public long getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(long clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+//    public File getAttachmentFile() {
+//        return attachmentFile;
+//    }
+//
+//    public void setAttachmentFile(File attachmentFile) {
+//        this.attachmentFile = attachmentFile;
+//    }
+
+
 
     public MailDto() {}
 
@@ -74,12 +104,12 @@ public class MailDto {
         isSeen = seen;
     }
 
-    public List<File> getAttachements() {
-        return attachements;
+    public List<File> getAttachments() {
+        return attachments;
     }
 
-    public void setAttachements(List<File> attachements) {
-        this.attachements = attachements;
+    public void setAttachments(List<File> attachments) {
+        this.attachments = attachments;
     }
 
     public String getLocalAttachmentsFolder() {
