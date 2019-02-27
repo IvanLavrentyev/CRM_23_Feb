@@ -115,7 +115,6 @@ public class MailSenderServiceImpl implements MailSenderService {
             logger.info("Attempt to send email to {}, sender {}", client.getFullName(), userName);
             Transport.send(mimeMessage);
             logger.info("Sent");
-//            String localFolder = environment.getRequiredProperty("email.localfolder.send.attachment");
             return true;
         } catch (AddressException e) {
             logger.error("Wrong email address {} of {}. Reason - {}", client.getEmail(), client.getFullName(), e);

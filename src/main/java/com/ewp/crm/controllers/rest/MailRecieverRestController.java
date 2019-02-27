@@ -23,9 +23,9 @@ public class MailRecieverRestController {
     }
 
     @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
-    @PostMapping(value = "/mail/getEmails")
-    public ResponseEntity<List<MailDto>> getAllUnreadEmailsFor(@RequestParam(name = "id") Long id){
-        List<MailDto> mailList = mailReceiverService.getAllEmailsFor(id);
+    @PostMapping(value = "/mail/getAllEmails")
+    public ResponseEntity<List<MailDto>> getAllEmails(@RequestParam(name = "id") Long id){
+        List<MailDto> mailList = mailReceiverService.getAllEmails(id);
         return ResponseEntity.ok(mailList);
     }
 

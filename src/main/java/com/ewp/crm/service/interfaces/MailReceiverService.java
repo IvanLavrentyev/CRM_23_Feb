@@ -8,9 +8,7 @@ import java.util.List;
 
 public interface MailReceiverService {
 
-    List<MailDto> getAllEmailsFor(Long userId);
-
-//    List <MailDto> getAttachmentsFromEmail (long sentDateMills);
+    List<MailDto> getAllEmails(Long userId);
 
     MailDto getEmailContentAndAttachment (long sentDateMills);
 

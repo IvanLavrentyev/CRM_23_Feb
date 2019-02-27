@@ -20,8 +20,8 @@ public class MailSenderRestController {
     }
 
     @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
-    @PostMapping(value = "/emails/send")
-    public ResponseEntity sendEmail(@RequestParam("id") long id,
+    @PostMapping(value = "/emails/sendMessage")
+    public ResponseEntity sendMessage (@RequestParam("id") long id,
                                     @RequestParam ("mailContent") String mailContent,
                                     @RequestParam ("attachments") MultipartFile[] files){
         return ResponseEntity.ok(mailSenderService.sendMessage(id, mailContent, files));

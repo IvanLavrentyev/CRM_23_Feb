@@ -9,11 +9,11 @@ $(document).ready(function () {
     let link = window.location.href;
     id = link.split('/');
     id = id[id.length - 1];
-    getEmails(id);
+    getAllEmails(id);
 });
 
-function getEmails(id) {
-    let url = '/mail/getEmails';
+function getAllEmails(id) {
+    let url = '/mail/getAllEmails';
     let data = {id: id};
     $.ajax({
         type: "POST",
@@ -57,7 +57,6 @@ function getEmails(id) {
 
 let xhr;
 function getMailContent(mail_sentDateMills) {
-
     if (typeof xhr !== 'undefined'){
         xhr.abort();
         console.log('ajax call has been aborted');
@@ -68,12 +67,10 @@ function getMailContent(mail_sentDateMills) {
 
     document.getElementById('skEditorHolder').style.display = 'none';
     document.getElementById('sendButton').style.display = 'none';
+    document.getElementById('replyButton').style.display = 'none';
+    document.getElementById('dragNdropContainer').style.display = 'none';
 
     document.getElementById('mailHeaderHolder_' + mail_sentDateMills).style.fontWeight = 'normal';
-
-    let replyButton = document.getElementById('replyButton');
-    replyButton.setAttribute('onclick', 'replyToEmail()');
-    replyButton.style.display = 'block';
 
     let url = '/mail/getEmailContentAndAttachment';
     let data = {sentDateMills: mail_sentDateMills};
@@ -91,6 +88,10 @@ let attachment_holder;
         success: function (emailContentAndAttachment) {
             let mailContentContainer = document.getElementById('mailContentContainer');
             pre.append(emailContentAndAttachment.content);
+
+            let replyButton = document.getElementById('replyButton');
+            replyButton.setAttribute('onclick', 'replyToEmail()');
+            replyButton.style.display = 'block';
 
             if (emailContentAndAttachment.attachments.length !== 0){
                 attachment_holder = document.createElement('div');
@@ -127,7 +128,7 @@ function replyToEmail() {
     document.getElementById('dragNdropContainer').style.display = 'block';
 
     let dragNdrop = $('#dragNdropContainer');
-    maxFileSize = 10000000;
+    let maxFileSize = 10000000;
 
     if (typeof (window.FileReader) === 'undefined') {
         dragNdrop.text('Не поддерживается');
@@ -178,15 +179,17 @@ function replyToEmail() {
 function sendEmail() {
     CKEDITOR.instances.editor1.config.allowedContent = false;
     let mailContent = CKEDITOR.instances.editor1.getData();
+
     if (mailContent !== '') {
         let formData = new FormData();
         formData.append('id', id);
         formData.append('mailContent', mailContent);
 
-        for (let i = 0; i <attachedFiles.length ; i++)
-            formData.append('attachments', attachedFiles[i]);
+        attachedFiles.forEach(attachedFile => {
+            formData.append('attachments', attachedFile);
+        });
 
-        let url = '/emails/send';
+        let url = '/emails/sendMessage';
         $.ajax({
             url: url,
             enctype: 'multipart/form-data',
