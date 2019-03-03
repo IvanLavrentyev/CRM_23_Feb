@@ -436,6 +436,7 @@ function showall() {
 }
 
 $(document).ready(function () {
+    
     $("#client_filter").change(function () {
         var allChecks = $('#client_filter input:checkbox');
         var data = [];
@@ -1744,7 +1745,9 @@ $(function () {
                     $('#fb-href').hide();
                     $('#slack-href').hide();
 
+                    // $('#mail-button').attr('href', 'https://mail.google.com/mail/u/1/#search/' + client.email);
                     $('#mail-button').attr('onclick', 'openNewTab(' + client.id +')');
+
 
                     for (var i = 0; i < client.socialProfiles.length; i++) {
                         if (client.socialProfiles[i].socialProfileType.name == 'vk') {
@@ -2207,6 +2210,10 @@ function deleteNewUser(deleteId) {
             alert("Пользователь не был удален")
         }
     });
+}
+
+function checkNewEmails() {
+    
 }
 
 /*

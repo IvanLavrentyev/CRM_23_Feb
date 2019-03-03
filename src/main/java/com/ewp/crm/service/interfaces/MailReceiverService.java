@@ -3,7 +3,6 @@ package com.ewp.crm.service.interfaces;
 import com.ewp.crm.models.dto.MailDto;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.util.List;
 
 public interface MailReceiverService {

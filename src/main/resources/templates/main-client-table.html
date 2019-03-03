@@ -131,6 +131,12 @@
                             <span th:id="'VK-notification'+${client.id}"
                                   class="vk-notification glyphicon glyphicon-send pull-right"
                                   style="color: darkblue;display: none;"></span>
+
+                            <span th:id="'email-notification'+${client.id}"
+                                  class="vk-notification glyphicon glyphicon-send pull-right"
+                                  style="color: darkblue;display: none;"></span>
+
+
                             <th:block th:each="notification_comment:${notifications_type_comment}">
                                 <th:block th:if="${notification_comment.client == client}">
                                    <span id="notification"

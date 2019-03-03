@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
-
 import javax.mail.*;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
@@ -22,6 +21,7 @@ import java.io.*;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 
 @Service
 @PropertySource("classpath:application.properties")
@@ -70,11 +70,12 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 
     @Override
     public List<Long> checkMessagesInGMailInbox() {
-
         List<Long> userIdList = new ArrayList<>();
+        messages = Arrays.asList(getMessages("imaps", "imap.gmail.com", eMailLogin,
+                eMailPassword, "INBOX"));
 
-        if (messages != null) {
-            for (Message message : messages) {
+        if (!messages.isEmpty()) {
+            messages.forEach(message -> {
                 try {
                     if (!message.isSet(Flags.Flag.SEEN)) {
                         String email = getEmailAddress(message.getFrom()[0].toString());
@@ -90,11 +91,11 @@ public class MailReceiverServiceImpl implements MailReceiverService {
                 } catch (MessagingException e) {
                     logger.error("Messaging exception" + e);
                 }
-            }
+            });
             return userIdList;
         }
         logger.error("List of messages is null in checkMessagesInGMailInbox()");
-        return null;
+        return userIdList;
     }
 
     @Override
